@@ -1,16 +1,42 @@
-// Setup the environement variables form a .env file
-require('dotenv').config();
-
-// Import expres
+const connection = require('./db-config');
 const express = require('express');
-
-// We store all express methods in a variable called app
+const chalk = require('chalk')
 const app = express();
 
-// If an environment variable named PORT exists, we take it in order to let the user change the port without chaning the source code. Otherwise we give a default value of 3000
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 5001;
 
-// We listen to incoming request on the port defined above
+connection.connect((err) => {
+  if (err) {
+    console.error('error connecting: ' + err.stack);
+  } else {
+    console.log('connected to database with threadId :  ' + connection.threadId);
+  }
+});
+
+
+// connection.promise().query('<SQL query>')
+//  .then(([result]) => {
+//   console.log('connected to database with threadId :  ' + connection.threadId);
+//  }).catch((err) => {
+//   console.error('error connecting: ' + err.stack);
+//  });
+
+
+
+app.get("/", (req, res) => {
+  response.send("Welcome to Express");
+});
+
+app.get('/api/movies', (req, res) => {
+  connection.query("SELECT * FROM movies", (err, result) => {
+    if (err) {
+      res.status(500).send('Error retrieving data from database');
+    } else {
+      res.status(200).json(result);
+    }
+  });
+});
+
 app.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
+  console.log(chalk.green.inverse(`Server listening on port ${port}`));
 });
